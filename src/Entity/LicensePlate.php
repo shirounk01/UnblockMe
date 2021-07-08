@@ -55,4 +55,9 @@ class LicensePlate
 
         return $this;
     }
+    // todo
+    public function __toString(): string
+    {
+        return $this->license_plate;
+    }
 }

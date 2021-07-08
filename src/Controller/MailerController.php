@@ -15,7 +15,7 @@ class MailerController extends AbstractController
     /**
      * @Route("/email", name="email_new")
      */
-    public function sendEmail(MailerInterface $mailer, User $user, String $password): Response
+    public function sendEmail(MailerInterface $mailer, User $user, string $password): Response
     {
         $email = (new TemplatedEmail())
             ->from('register@unblockme.com')

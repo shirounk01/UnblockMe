@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserType;
+use App\Services\MailerService;
 use ContainerFLoPfE9\getSecurity_Command_UserPasswordHashService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,20 +34,22 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/register', name: 'user_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, UserPasswordHasherInterface $passwordHasher, MailerController $mail, MailerInterface $mailer): Response
+    public function new(Request $request, UserPasswordHasherInterface $passwordHasher, MailerService $mailer) : Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $entityManager = $this->getDoctrine()->getManager();
-            $password = substr(sha1(time()), 0, 10);
+            $password = substr(sha1(time()), 0, 8);
             $user->setPassword($passwordHasher->hashPassword($user, $password));
             $entityManager->persist($user);
             $entityManager->flush();
-            return $mail->sendEmail($mailer, $user, $password);
+
+            $mailer->sendEmail($user, $password);
+
+            return $this->redirectToRoute('app_login');
         }
 
         return $this->render('user/new.html.twig', [

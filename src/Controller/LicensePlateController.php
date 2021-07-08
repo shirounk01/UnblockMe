@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\LicensePlate;
 use App\Form\LicensePlate1Type;
 use App\Repository\LicensePlateRepository;
+use App\Services\ActivityService;
+use App\Services\MailerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +26,7 @@ class LicensePlateController extends AbstractController
     }
 
     #[Route('/new', name: 'license_plate_new', methods: ['GET', 'POST'])]
-    public function new(Request $request): Response
+    public function new(Request $request, ActivityService $activity, MailerService $mailer, LicensePlateRepository $repo): Response
     {
         $licensePlate = new LicensePlate();
         $form = $this->createForm(LicensePlate1Type::class, $licensePlate);
@@ -32,6 +34,29 @@ class LicensePlateController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
            //$licensePlate->setUser(app.user.username);
+
+            $hasUser = $repo->findOneBy(['license_plate'=>$licensePlate->getLicensePlate()]);
+            if($hasUser and !$hasUser->getUser())
+            {
+                $entityManager = $this->getDoctrine()->getManager();
+                $hasUser->setUser($this->getUser());
+                $entityManager->persist($hasUser);
+                $entityManager->flush();
+                $blocker = $activity->whoBlockedMe($licensePlate->getLicensePlate());
+                $blockee = $activity->iveBlockedSomebody($licensePlate->getLicensePlate());
+                if($blocker)
+                {
+                    $mid = $repo->findOneBy(['license_plate'=>$blocker]);
+                    $mailer->sendBlockeeReport($mid->getUser(), $hasUser->getUser(), $mid->getLicensePlate());
+                }
+                if($blockee)
+                {
+                    $mid = $repo->findOneBy(['license_plate'=>$blockee]);
+                    $mailer->sendBlockerReport($mid->getUser(), $hasUser->getUser(), $mid->getLicensePlate());// blockee, blocker, blockee lp
+                }
+                return $this->redirectToRoute('license_plate_index');
+            }
+
             $entityManager = $this->getDoctrine()->getManager();
             $licensePlate->setUser($this->getUser());
             $entityManager->persist($licensePlate);
