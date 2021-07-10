@@ -26,15 +26,6 @@ class BlockerType extends AbstractType
     {
         //todo
         $builder
-            ->add('blocker', EntityType::class, [
-                'class' => LicensePlate::class,
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('u')
-                        ->andWhere('u.user = :val')
-                        ->setParameter('val', $this->security->getUser());
-                },
-                'choice_label' => 'license_plate',
-            ])
             ->add('blockee')
         ;
     }

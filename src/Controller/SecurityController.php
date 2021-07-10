@@ -42,7 +42,7 @@ class SecurityController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
-            $password = substr(sha1(time()), 0, 8);
+            $password = substr(sha1(time()), 0, 10);
             $user->setPassword($passwordHasher->hashPassword($user, $password));
             $entityManager->persist($user);
             $entityManager->flush();

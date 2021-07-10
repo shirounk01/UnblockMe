@@ -2,6 +2,10 @@
 
 namespace App\Controller;
 
+use Symfony\Component\String\ByteString;
+use Symfony\Component\String\CodePointString;
+use Symfony\Component\String\UnicodeString;
+
 use App\Entity\LicensePlate;
 use App\Form\LicensePlate1Type;
 use App\Repository\LicensePlateRepository;
@@ -34,6 +38,8 @@ class LicensePlateController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
            //$licensePlate->setUser(app.user.username);
+            // todo
+            $licensePlate->setLicensePlate((new UnicodeString($licensePlate->getLicensePlate()))->camel()->upper());
 
             $hasUser = $repo->findOneBy(['license_plate'=>$licensePlate->getLicensePlate()]);
             if($hasUser and !$hasUser->getUser())
@@ -48,12 +54,23 @@ class LicensePlateController extends AbstractController
                 {
                     $mid = $repo->findOneBy(['license_plate'=>$blocker]);
                     $mailer->sendBlockeeReport($mid->getUser(), $hasUser->getUser(), $mid->getLicensePlate());
+                    $message = "Your car has been blocked by ".$mid->getLicensePlate()."!";
+                    $this->addFlash(
+                        'warning',
+                        $message
+                    );
                 }
                 if($blockee)
                 {
                     $mid = $repo->findOneBy(['license_plate'=>$blockee]);
                     $mailer->sendBlockerReport($mid->getUser(), $hasUser->getUser(), $mid->getLicensePlate());// blockee, blocker, blockee lp
+                    $message="You blocked the car ".$mid->getLicensePlate()."!";
+                    $this->addFlash(
+                        'danger',
+                        $message
+                    );
                 }
+
                 return $this->redirectToRoute('license_plate_index');
             }
 
@@ -61,6 +78,12 @@ class LicensePlateController extends AbstractController
             $licensePlate->setUser($this->getUser());
             $entityManager->persist($licensePlate);
             $entityManager->flush();
+
+            $message = 'The car ' . $licensePlate->getLicensePlate() . ' has been added to your account!';
+            $this->addFlash(
+                'success',
+                $message
+            );
 
             return $this->redirectToRoute('license_plate_index');
         }
@@ -82,10 +105,17 @@ class LicensePlateController extends AbstractController
     #[Route('/{id}/edit', name: 'license_plate_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, LicensePlate $licensePlate): Response
     {
+        $message = "Car ".$licensePlate->getLicensePlate()." has been changed to ";
         $form = $this->createForm(LicensePlate1Type::class, $licensePlate);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
+            $licensePlate->setLicensePlate((new UnicodeString($licensePlate->getLicensePlate()))->camel()->upper());
+            $message = $message . $licensePlate->getLicensePlate();
+            $this->addFlash(
+                'success',
+                $message
+            );
+
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute('license_plate_index');
