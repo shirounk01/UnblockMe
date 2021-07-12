@@ -1,11 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New LicensePlate{% endblock %}
+{% block title %}New Car{% endblock %}
 
 {% block body %}
-    <h1>Create new LicensePlate</h1>
+<div class="card mx-auto example-wrapper border-primary" style="width: 50vw;">
+    <div class="card-body">
+    <h1>Add a new car</h1>
 
     {{ include('license_plate/_form.html.twig') }}
-
-    <a href="{{ path('license_plate_index') }}">back to list</a>
+    </div></div>
 {% endblock %}

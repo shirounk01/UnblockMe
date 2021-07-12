@@ -1,27 +1,36 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello {{ app.user.username }}! ✅</h1>
-
-    Thank you for choosing our app for the encountered parking inconveniences!
-    <br>
-    My cars: <button onclick="location.href='/license/plate'" type="button">Access</button>
-    <div>
-        <button onclick="location.href='blockee'" type="button">Someone blocked me</button>
+    <div class="">
+        <div class="card mx-auto example-wrapper border-primary" style="width: 50vw;">
+            <div class="card-body">
+                <h2 class="text-center">🚗 Hello {{ app.user.username }}! 🚗</h2>
+                <p class="text-primary">
+                    Thank you for choosing our app for the encountered parking inconveniences!
+                </p>
+                <div>
+                    Here is a brief introduction to what our application has to offer:
+                    <ul class="" style="list-style-type: none">
+                        <li class="my-1"><b class="text-primary">Report blocker</b> ~ here you
+                            can report someone who has blocked one of your vehicles
+                        </li>
+                        <li class="my-1"><b class="text-primary">Report blockee</b> ~ when you
+                            have blocked someone and want to let them know, this is the go-to option
+                        </li>
+                        <li class="my-1"><b class="text-primary">My cars</b> ~ the list of the
+                            cars associated to the current account are found here
+                        </li>
+                        <li class="my-1"><b class="text-primary">Change password</b> ~ your
+                            password can be changed an unlimited number of times here
+                        </li>
+                        <li class="my-1"><b class="text-primary">Log out</b> ~ it is what its
+                            name stands for
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <button onclick="location.href='blocker'" type="button">I have blocked someone</button>
-    </div>
-    <div>
-        <button onclick="location.href='password'" type="button">Change password</button>
-    </div>
-</div>
 {% endblock %}

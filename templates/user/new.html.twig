@@ -1,12 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New User{% endblock %}
+{% block title %}Sign up!{% endblock %}
 
 {% block body %}
-
-    <h1>Create new User</h1>
+<div class="card mx-auto example-wrapper border-primary" style="width: 50vw;">
+    <div class="card-body">
+    <h1>Sign up</h1>
 
     {{ include('user/_form.html.twig') }}
-
-    <a href="{{ path('home') }}">back to list</a>
+        <br>
+        <i><p class="text-primary font-weight-light fs-6">*You will receive an email with a randomly generated password. The password can be changed.</p></i>
+    </div></div>
 {% endblock %}

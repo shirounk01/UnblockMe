@@ -1,11 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Password{% endblock %}
+{% block title %}Change password{% endblock %}
 
 {% block body %}
+<div class="card mx-auto example-wrapper border-primary" style="width: 50vw;">
+    <div class="card-body">
     <h1>Change password</h1>
 
     {{ include('password/_form.html.twig') }}
-
-    <a href="{{ path('home') }}">back to list</a>
+</div></div>
 {% endblock %}

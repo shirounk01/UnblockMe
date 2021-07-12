@@ -10,22 +10,73 @@
         {% endblock %}
 
         {% block javascripts %}
-            {#{{ encore_entry_script_tags('app') }}#}
+            <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
         {% endblock %}
     </head>
 
-    <body>
-    <nav>
+    <body style="background-color:#ededed;">
+    <style>
+        .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+        .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+    </style>
+
+    <nav class="navbar sticky-top navbar-light navbar-expand-md bg-faded justify-content-center navbar-dark bg-primary" style="padding: 10px;">
+        <a href="/" class="navbar-brand d-flex w-50 mr-auto">Unblock me</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsingNavbar3">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse w-100" id="collapsingNavbar3">
+            {% if app.user is not null %}
+            <ul class="navbar-nav w-100 justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="/blockee">Report blocker</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/blocker">Report blockee</a>
+                </li>
+            </ul>
+                {% endif %}
+            <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
+                {% if app.user is null %}<li class="nav-item">
+                <li class="nav-item">
+                    <a class="nav-link" href="/register">Register</a>
+                </li>
+
+
+                    <a class="nav-link" href="">Login</a>
+                </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <div class="dropdown">
+                                <a class="btn btn-primary dropdown-toggle nav-link" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    {{ app.user.username }}
+                                </a>
+                                <div class="dropdown-menu" style="right: 0; left: auto;" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/license/plate">My cars</a>
+                                    <a class="dropdown-item" href="/password">Change password</a>
+                                    <a class="dropdown-item" href="/logout">Log out</a>
+                                </div>
+                            </div>
+                        </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <nav class="fixed-bottom">
         {% for label, messages in app.flashes %}
             {% for message in messages %}
-                <div class="alert alert-{{ label }}" role="alert">
-                    <b>
-                        {{ message }}
-                    </b>
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{message}}
+                    <button type="button" class="close btn-close" data-dismiss="alert" aria-label="Close"></button>
                 </div>
             {%  endfor %}
         {% endfor %}
     </nav>
-        {% block body %}{% endblock %}
+        {% block body %}
+        {% endblock %}
+
     </body>
 </html>

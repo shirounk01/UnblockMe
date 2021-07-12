@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use phpDocumentor\Reflection\Types\This;
 use Symfony\Component\String\ByteString;
 use Symfony\Component\String\CodePointString;
 use Symfony\Component\String\UnicodeString;
@@ -40,8 +41,16 @@ class LicensePlateController extends AbstractController
            //$licensePlate->setUser(app.user.username);
             // todo
             $licensePlate->setLicensePlate((new UnicodeString($licensePlate->getLicensePlate()))->camel()->upper());
-
             $hasUser = $repo->findOneBy(['license_plate'=>$licensePlate->getLicensePlate()]);
+            if($hasUser and $hasUser->getUser()==$this->getUser())
+            {
+                $message = "You have already introduced the car ".$licensePlate->getLicensePlate()."!";
+                $this->addFlash(
+                    'warning',
+                    $message
+                );
+                return $this->redirectToRoute('license_plate_index');
+            }
             if($hasUser and !$hasUser->getUser())
             {
                 $entityManager = $this->getDoctrine()->getManager();

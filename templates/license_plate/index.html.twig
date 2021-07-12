@@ -1,16 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}LicensePlate index{% endblock %}
+{% block title %}My cars{% endblock %}
 
 {% block body %}
-    <h1>LicensePlate index</h1>
+<div class="card mx-auto example-wrapper border-primary" style="width: 50vw;">
+    <div class="card-body">
+    <h1>My cars</h1>
 
-    <table class="table">
-        <thead>
+    <table class="table table-light table-hover">
+        <thead class="table-primary">
             <tr>
-                <th>Id</th>
-                <th>License_plate</th>
-                <th>actions</th>
+                <th>ID</th>
+                <th>License Plate</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -19,16 +21,17 @@
                 <td>{{ license_plate.id }}</td>
                 <td>{{ license_plate.licensePlate }}</td>
                 <td>
-                    <a href="{{ path('license_plate_show', {'id': license_plate.id}) }}">show</a>
-                    <a href="{{ path('license_plate_edit', {'id': license_plate.id}) }}">edit</a>
+                    <a class="btn btn-outline-success mx-2" href="{{ path('license_plate_show', {'id': license_plate.id}) }}">Show</a>
+                    <a class="btn btn-outline-primary mx-2" href="{{ path('license_plate_edit', {'id': license_plate.id}) }}">Edit</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="3">no records found</td>
+                <td colspan="3">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-    <button onclick="location.href='/license/plate/new'" type="button">Add car!</button>
+    <button onclick="location.href='/license/plate/new'" type="button" class="btn btn-outline-primary">Add car!</button>
+    </div></div>
 {% endblock %}

@@ -48,23 +48,18 @@ class HomeController extends AbstractController
     {
         $activity = new Activity();
         $form = $this->createForm(BlockerType::class, $activity);
-        $blockedCars = $licensePlate->findBy(['user'=>$this->getUser()]);
-        if(count($blockedCars)<=1)
+        $entry = $licensePlate->findOneBy(['user' => $this->getUser()]);
+        if($entry)
         {
-            $activity->setBlocker($blockedCars[0]);
-            $form->add('blocker', TextType::class, ['disabled'=>true]); // bless this
+            $activity->setBlocker($entry->getLicensePlate());
         }
         else
         {
-            $form->add('blocker', EntityType::class, [
-                'class' => LicensePlate::class,
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('u')
-                        ->andWhere('u.user = :val')
-                        ->setParameter('val', $this->getUser());
-                },
-                'choice_label' => 'license_plate'
-            ]);
+            $this->addFlash(
+                'notice',
+                'Your dont have any cars!'
+            );
+            return $this->redirectToRoute('home');
         }
         $form->handleRequest($request);
 
@@ -119,29 +114,25 @@ class HomeController extends AbstractController
     {
         $activity = new Activity();
         $form = $this->createForm(BlockeeType::class, $activity);
-        $blockedCars = $licensePlate->findBy(['user'=>$this->getUser()]);
-        if(count($blockedCars)<=1)
+        $entry = $licensePlate->findOneBy(['user' => $this->getUser()]);
+        if($entry)
         {
-            $activity->setBlockee($blockedCars[0]);
-            $form->add('blockee', TextType::class, ['disabled'=>true]); // bless this
+            $activity->setBlockee($entry->getLicensePlate());
         }
         else
         {
-            $form->add('blockee', EntityType::class, [
-                'class' => LicensePlate::class,
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('u')
-                        ->andWhere('u.user = :val')
-                        ->setParameter('val', $this->getUser());
-                },
-                'choice_label' => 'license_plate'
-            ]);
+            $this->addFlash(
+                'notice',
+                'Your dont have any cars!'
+            );
+            return $this->redirectToRoute('home');
         }
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             //$licensePlate->setUser(app.user.username);
             //$activity->setBlocker($licensePlate->findOneBy(['user'=>$this->getUser()])->getLicensePlate());
+
             //todo
             $entityManager = $this->getDoctrine()->getManager();
             $activity->setBlockee((new UnicodeString($activity->getBlockee()))->camel()->upper());
@@ -149,6 +140,7 @@ class HomeController extends AbstractController
             $entityManager->persist($activity);
             $entityManager->flush();
             $new = $licensePlate->findOneBy(['license_plate'=>$activity->getBlocker()]);
+
             if($new)
             {
                 $blockee = $licensePlate->findOneBy(['license_plate'=>$activity->getBlockee()]);

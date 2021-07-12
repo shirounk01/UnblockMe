@@ -1,26 +1,29 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}LicensePlate{% endblock %}
+{% block title %}Car {{ license_plate.licensePlate }}{% endblock %}
 
 {% block body %}
-    <h1>LicensePlate</h1>
+<div class="card mx-auto example-wrapper border-primary" style="width: 50vw;">
+    <div class="card-body">
+    <h1>Car {{ license_plate.licensePlate }}</h1>
 
-    <table class="table">
+    <table class="table table-light table-hover">
         <tbody>
             <tr>
-                <th>Id</th>
+                <th>ID</th>
                 <td>{{ license_plate.id }}</td>
             </tr>
             <tr>
-                <th>License_plate</th>
+                <th>License Plate</th>
                 <td>{{ license_plate.licensePlate }}</td>
             </tr>
         </tbody>
     </table>
 
-    <a href="{{ path('license_plate_index') }}">back to list</a>
-
-    <a href="{{ path('license_plate_edit', {'id': license_plate.id}) }}">edit</a>
+        <div class="btn-group" role="group" >
+    <a class="btn btn-outline-primary mx-2" href="{{ path('license_plate_edit', {'id': license_plate.id}) }}">Edit</a>
 
     {{ include('license_plate/_delete_form.html.twig') }}
+        </div>
+    </div></div>
 {% endblock %}
