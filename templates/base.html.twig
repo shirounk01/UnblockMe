@@ -31,21 +31,21 @@
             {% if app.user is not null %}
             <ul class="navbar-nav w-100 justify-content-center">
                 <li class="nav-item">
-                    <a class="nav-link" href="/blockee">Report blocker</a>
+                    <a class="nav-link" href="{{ path('blockee') }}">Report blocker</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/blocker">Report blockee</a>
+                    <a class="nav-link" href="{{ path('blocker') }}">Report blockee</a>
                 </li>
             </ul>
                 {% endif %}
             <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
                 {% if app.user is null %}<li class="nav-item">
                 <li class="nav-item">
-                    <a class="nav-link" href="/register">Register</a>
+                    <a class="nav-link" href="{{ path('user_new') }}">Register</a>
                 </li>
 
 
-                    <a class="nav-link" href="">Login</a>
+                    <a class="nav-link" href="{{ path('app_login') }}">Login</a>
                 </li>
                     {% else %}
                         <li class="nav-item">
@@ -54,9 +54,9 @@
                                     {{ app.user.username }}
                                 </a>
                                 <div class="dropdown-menu" style="right: 0; left: auto;" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="/license/plate">My cars</a>
-                                    <a class="dropdown-item" href="/password">Change password</a>
-                                    <a class="dropdown-item" href="/logout">Log out</a>
+                                    <a class="dropdown-item" href="{{ path('license_plate_index') }}">My cars</a>
+                                    <a class="dropdown-item" href="{{ path('password_new') }}">Change password</a>
+                                    <a class="dropdown-item" href="{{ path('app_logout') }}">Log out</a>
                                 </div>
                             </div>
                         </li>

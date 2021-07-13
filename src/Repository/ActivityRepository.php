@@ -82,34 +82,31 @@ class ActivityRepository extends ServiceEntityRepository
 //            //->getResult()
 //            ;
 //    }
-    // todo
     /**
      * @param $value
-     * @return array Returns an Activity object
-     * @throws NonUniqueResultException
+     * @return array|null
      */
-    public function findByBlockee($value): ?Activity
-    {
-        return $this->createQueryBuilder('l')
-            ->andWhere('l.blockee = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-            ;
-    }
-
-    /**
-     * @param $value
-     * @return array Returns an Activity object
-     * @throws NonUniqueResultException
-     */
-    public function findByBlocker($value): ?Activity
+    public function findByBlocker($value): ?array
     {
         return $this->createQueryBuilder('l')
             ->andWhere('l.blocker = :val')
             ->setParameter('val', $value)
             ->getQuery()
-            ->getOneOrNullResult()
+            ->getResult()
+            ;
+    }
+
+    /**
+     * @param $value
+     * @return array|null
+     */
+    public function findByBlockee($value): ?array
+    {
+        return $this->createQueryBuilder('l')
+            ->andWhere('l.blockee = :val')
+            ->setParameter('val', $value)
+            ->getQuery()
+            ->getResult()
             ;
     }
 

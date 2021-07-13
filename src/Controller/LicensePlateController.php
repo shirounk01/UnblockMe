@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Services\LicensePlateService;
+use PharIo\Manifest\License;
 use phpDocumentor\Reflection\Types\This;
 use Symfony\Component\String\ByteString;
 use Symfony\Component\String\CodePointString;
@@ -31,7 +33,7 @@ class LicensePlateController extends AbstractController
     }
 
     #[Route('/new', name: 'license_plate_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, ActivityService $activity, MailerService $mailer, LicensePlateRepository $repo): Response
+    public function new(Request $request, ActivityService $activity, MailerService $mailer, LicensePlateRepository $repo, LicensePlateService $licensePlateService): Response
     {
         $licensePlate = new LicensePlate();
         $form = $this->createForm(LicensePlate1Type::class, $licensePlate);
@@ -40,7 +42,7 @@ class LicensePlateController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
            //$licensePlate->setUser(app.user.username);
             // todo
-            $licensePlate->setLicensePlate((new UnicodeString($licensePlate->getLicensePlate()))->camel()->upper());
+            $licensePlate->setLicensePlate($licensePlateService->formatString($licensePlate->getLicensePlate()));
             $hasUser = $repo->findOneBy(['license_plate'=>$licensePlate->getLicensePlate()]);
             if($hasUser and $hasUser->getUser()==$this->getUser())
             {
@@ -61,23 +63,36 @@ class LicensePlateController extends AbstractController
                 $blockee = $activity->iveBlockedSomebody($licensePlate->getLicensePlate());
                 if($blocker)
                 {
-                    $mid = $repo->findOneBy(['license_plate'=>$blocker]);
-                    $mailer->sendBlockeeReport($mid->getUser(), $hasUser->getUser(), $mid->getLicensePlate());
-                    $message = "Your car has been blocked by ".$mid->getLicensePlate()."!";
-                    $this->addFlash(
-                        'warning',
-                        $message
-                    );
+                    foreach($blocker as &$item)
+                    {
+                        $mid = $repo->findOneBy(['license_plate'=>$item->getBlocker()]);
+                        $mailer->sendBlockeeReport($mid->getUser(), $hasUser->getUser(), $mid->getLicensePlate());
+                        $message = "Your car has been blocked by ".$mid->getLicensePlate()."!";
+                        $this->addFlash(
+                            'warning',
+                            $message
+                        );
+                        $item->setStatus(1);
+                        $entityManager->persist($item);
+                        $entityManager->flush();
+                    }
                 }
                 if($blockee)
                 {
-                    $mid = $repo->findOneBy(['license_plate'=>$blockee]);
-                    $mailer->sendBlockerReport($mid->getUser(), $hasUser->getUser(), $mid->getLicensePlate());// blockee, blocker, blockee lp
-                    $message="You blocked the car ".$mid->getLicensePlate()."!";
-                    $this->addFlash(
-                        'danger',
-                        $message
-                    );
+                    foreach ($blockee as &$item)
+                    {
+                        $mid = $repo->findOneBy(['license_plate'=>$item->getBlockee()]);
+                        $mailer->sendBlockerReport($mid->getUser(), $hasUser->getUser(), $mid->getLicensePlate());// blockee, blocker, blockee lp
+                        $message="You blocked the car ".$mid->getLicensePlate()."!";
+                        $this->addFlash(
+                            'danger',
+                            $message
+                        );
+                        $item->setStatus(1);
+                        $entityManager->persist($item);
+                        $entityManager->flush();
+                    }
+
                 }
 
                 return $this->redirectToRoute('license_plate_index');
@@ -112,13 +127,24 @@ class LicensePlateController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'license_plate_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, LicensePlate $licensePlate): Response
+    public function edit(Request $request, LicensePlate $licensePlate, LicensePlateService $licensePlateService, ActivityService $activityService): Response
     {
         $message = "Car ".$licensePlate->getLicensePlate()." has been changed to ";
+
+        if($activityService->whoBlockedMe($licensePlate->getLicensePlate()) or $activityService->iveBlockedSomebody($licensePlate->getLicensePlate()))
+        {
+            $this->addFlash(
+                'warning',
+                'You cannot edit your car while it either is blocked or is blocking. Please solve the issues in order to complete the process!'
+            );
+            return $this->redirectToRoute('license_plate_index');
+        }
+
         $form = $this->createForm(LicensePlate1Type::class, $licensePlate);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $licensePlate->setLicensePlate((new UnicodeString($licensePlate->getLicensePlate()))->camel()->upper());
+
+            $licensePlate->setLicensePlate($licensePlateService->formatString($licensePlate->getLicensePlate()));
             $message = $message . $licensePlate->getLicensePlate();
             $this->addFlash(
                 'success',
@@ -137,8 +163,16 @@ class LicensePlateController extends AbstractController
     }
 
     #[Route('/{id}', name: 'license_plate_delete', methods: ['POST'])]
-    public function delete(Request $request, LicensePlate $licensePlate): Response
+    public function delete(Request $request, LicensePlate $licensePlate, ActivityService $activityService): Response
     {
+        if($activityService->whoBlockedMe($licensePlate->getLicensePlate()) or $activityService->iveBlockedSomebody($licensePlate->getLicensePlate()))
+        {
+            $this->addFlash(
+                'warning',
+                'You cannot delete your car while it either is blocked or is blocking. Please solve the issues in order to complete the process!'
+            );
+            return $this->redirectToRoute('license_plate_index');
+        }
         if ($this->isCsrfTokenValid('delete'.$licensePlate->getId(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($licensePlate);

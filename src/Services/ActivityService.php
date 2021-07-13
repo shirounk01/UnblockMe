@@ -26,31 +26,21 @@ class ActivityService
 
     /**
      * @param string $licensePlate
-     * @return string|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return array|null
      */
-    public function iveBlockedSomebody(string $licensePlate): ?string
+    public function iveBlockedSomebody(string $licensePlate): ?array
     {
-        $blocker = $this->activityRepo->findByBlocker($licensePlate);
-
-        if ($blocker instanceof Activity){
-            return $blocker->getBlockee();
-        }
-        return '';
+        $blockees = $this->activityRepo->findByBlocker($licensePlate);
+        return (count($blockees)?$blockees:null);
     }
 
     /**
      * @param string $licensePlate
-     * @return string|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return array|null
      */
-    public function whoBlockedMe(string $licensePlate): ?string
+    public function whoBlockedMe(string $licensePlate): ?array
     {
-        $blocker = $this->activityRepo->findByBlockee($licensePlate);
-
-        if ($blocker instanceof Activity){
-            return $blocker->getBlocker();
-        }
-        return '';
+        $blockers = $this->activityRepo->findByBlockee($licensePlate);
+        return (count($blockers)?$blockers:null);
     }
 }

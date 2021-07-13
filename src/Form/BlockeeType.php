@@ -6,6 +6,7 @@ use App\Entity\Activity;
 use App\Entity\LicensePlate;
 use App\Entity\User;
 use App\Repository\LicensePlateRepository;
+use App\Services\LicensePlateService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\AbstractType;
@@ -16,36 +17,35 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 class BlockeeType extends AbstractType
 {
-    private $security; // bless this
+    private $security;
     private $em;
+    private $licensePlateService;
 
-    public function __construct(Security $security, EntityManagerInterface $em)
+    public function __construct(Security $security, EntityManagerInterface $em, LicensePlateService $licensePlateService)
     {
         $this->security = $security;
         $this->em = $em;
+        $this->licensePlateService = $licensePlateService;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $repo = $this->em->getRepository('App:LicensePlate');
-        $blockedCars = $repo->findBy(['user'=>$this->security->getUser()]);
-        if(count($blockedCars)==1){
-            $builder->add('blockee', TextType::class, array('disabled' => true, 'attr' => array('placeholder' => (string)$blockedCars[0])));
+        if($this->licensePlateService->countLicensePlates($this->security->getUser()) == 1)
+        {
+            $builder->add('blockee', TextType::class, array('disabled' => true, 'attr' => array('placeholder' => $this->licensePlateService->getFirstLicensePlate($this->security->getUser()))));
         }
-        else{
-        $builder->add('blockee', EntityType::class, [
-            'class' => LicensePlate::class,
-            'query_builder' => function (EntityRepository $er) {
-                return $er->createQueryBuilder('u')
-                    ->andWhere('u.user = :val')
-                    ->setParameter('val', $this->security->getUser());
-            },
-            'choice_label' => 'license_plate'
-        ]);
-    }
-        $builder
-            ->add('blocker')
-        ;
+        else
+        {
+            $builder
+                ->add('blockee', EntityType::class, [
+                    'class' => LicensePlate::class,
+                    'query_builder' => function (LicensePlateRepository $er) {
+                        return $er->findByUser($this->security->getUser());
+                    },
+                    'choice_label' => 'license_plate',
+                ]);
+        }
+        $builder->add('blocker');
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -55,4 +55,3 @@ class BlockeeType extends AbstractType
         ]);
     }
 }
-// app.user.username
