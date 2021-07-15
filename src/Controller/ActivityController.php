@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\NewPasswordType;
 use App\Form\UserType;
+use App\Repository\ActivityRepository;
 use App\Repository\UserRepository;
+use App\Services\ActivityService;
 use App\Services\LicensePlateService;
 use Doctrine\ORM\EntityRepository;
 use phpDocumentor\Reflection\Types\This;
@@ -28,6 +30,39 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/activity')]
 class ActivityController extends AbstractController
 {
+
+    #[Route('/', name: 'activity_index', methods: ['GET'])]
+    public function index(ActivityRepository $activityRepository, LicensePlateRepository $licensePlateRepository): Response
+    {
+        $entry = $licensePlateRepository->findBy(['user'=>$this->getUser()]);
+        foreach ($entry as &$it)
+        {
+            $it = $it->getLicensePlate();
+        }
+        //dd($activityRepository->findBy(['blocker'=>$entry]), $activityRepository->findBy(['blockee'=>$entry]));
+        return $this->render('activity/index.html.twig', [
+            'blocker' => $activityRepository->findBy(['blocker'=>$entry]),
+            'blockee' => $activityRepository->findBy(['blockee'=>$entry])
+        ]);
+    }
+
+    #[Route('/{blocker}/{blockee}', name: 'activity_delete', methods: ['POST'])]
+    public function delete(Request $request, Activity $activity): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$activity->getBlocker(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($activity);
+            $entityManager->flush();
+            $this->addFlash(
+                'success',
+                'The issue has been solved!'
+            );
+
+        }
+
+        return $this->redirectToRoute('activity_index');
+    }
+
     #[Route('/blocker', name: 'blocker', methods: ['GET', 'POST'])]
     public function iveBlockedSomeone(Request $request, LicensePlateRepository $licensePlate, MailerService $mailer, LicensePlateService $licensePlateService): Response
     {
@@ -56,7 +91,16 @@ class ActivityController extends AbstractController
             $activity->setBlockee($licensePlateService->formatString($activity->getBlockee()));
             $activity->setBlocker($licensePlateService->formatString($activity->getBlocker()));
             $entityManager->persist($activity);
-            $entityManager->flush();
+            try{
+                $entityManager->flush();
+            }catch (\Exception $e)
+            {
+                $this->addFlash(
+                    'warning',
+                    'This issue is already registered.'
+                );
+                return $this->redirectToRoute('home');
+            }
             $new = $licensePlate->findOneBy(['license_plate'=>$activity->getBlockee()]);
             if($new)
             {
@@ -136,8 +180,18 @@ class ActivityController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $activity->setBlockee($licensePlateService->formatString($activity->getBlockee()));
             $activity->setBlocker($licensePlateService->formatString($activity->getBlocker()));
+
             $entityManager->persist($activity);
-            $entityManager->flush();
+            try {
+                $entityManager->flush();
+            }catch (\Exception $e)
+            {
+                $this->addFlash(
+                    'warning',
+                    'This issue is already registered.'
+                );
+                return $this->redirectToRoute('home');
+            }
             $new = $licensePlate->findOneBy(['license_plate'=>$activity->getBlocker()]);
 
             if($new)

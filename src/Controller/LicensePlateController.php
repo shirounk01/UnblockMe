@@ -127,7 +127,7 @@ class LicensePlateController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'license_plate_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, LicensePlate $licensePlate, LicensePlateService $licensePlateService, ActivityService $activityService): Response
+    public function edit(Request $request, LicensePlate $licensePlate, LicensePlateService $licensePlateService, ActivityService $activityService, LicensePlateRepository $licensePlateRepository): Response
     {
         $message = "Car ".$licensePlate->getLicensePlate()." has been changed to ";
 
@@ -145,6 +145,16 @@ class LicensePlateController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             $licensePlate->setLicensePlate($licensePlateService->formatString($licensePlate->getLicensePlate()));
+            $exists = $licensePlateRepository->findBy(['user'=>$this->getUser(), 'license_plate'=>$licensePlate->getLicensePlate()]);
+            if($exists)
+            {
+                $message = "You have already introduced the car ".$licensePlate->getLicensePlate()."!";
+                $this->addFlash(
+                    'warning',
+                    $message
+                );
+                return $this->redirectToRoute('license_plate_index');
+            }
             $message = $message . $licensePlate->getLicensePlate();
             $this->addFlash(
                 'success',
