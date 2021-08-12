@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityRepository;
 use phpDocumentor\Reflection\Types\This;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\String\UnicodeString;
@@ -63,4 +64,31 @@ class UserController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}', name: 'user_delete', methods: ['POST'])]
+    public function delete(Request $request, User $user, LicensePlateService $licensePlateService): Response
+    {
+        //
+        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            //dd($user);
+            $licensePlateService->removeUser($user);
+            //dd($user);
+            $entityManager->remove($user);
+
+            $session = $this->get('session');
+            $session = new Session();
+            $session->invalidate();
+
+            $entityManager->flush();
+
+            $message = 'The account was deleted!';
+            $this->addFlash(
+                'success',
+                $message
+            );
+        }
+
+        //dd($user);
+        return $this->redirectToRoute('app_login');
+    }
 }

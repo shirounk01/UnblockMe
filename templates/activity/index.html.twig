@@ -47,7 +47,7 @@
             <tr>
                 <th>Your car</th>
                 <th>Car blocked</th>
-{#                <th></th>#}
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -66,6 +66,16 @@
                     {#                    <a class="btn btn-outline-success mx-2" href="{{ path('license_plate_show', {'id': license_plate.id}) }}">Show</a>#}
                     {#                    <a class="btn btn-outline-primary mx-2" href="{{ path('license_plate_edit', {'id': license_plate.id}) }}">Edit</a>#}
                     {#                </td>#}
+
+
+                    <td>{% if blocker.status == 2 %}
+                        <form method="post" action="{{ path('activity_delete', {'blocker': blocker.blocker, 'blockee': blocker.blockee}) }}" onsubmit="return confirm('Do you really want to solve this issue?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ blocker.blocker) }}">
+                            <button class="btn btn-outline-primary mx-2">Solve</button>
+                        </form>
+
+                        {% endif %}
+                    </td>
                 </tr>
             {% else %}
                 <tr>

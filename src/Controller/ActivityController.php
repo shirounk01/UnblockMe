@@ -41,8 +41,8 @@ class ActivityController extends AbstractController
         }
         //dd($activityRepository->findBy(['blocker'=>$entry]), $activityRepository->findBy(['blockee'=>$entry]));
         return $this->render('activity/index.html.twig', [
-            'blocker' => $activityRepository->findBy(['blocker'=>$entry]),
-            'blockee' => $activityRepository->findBy(['blockee'=>$entry])
+            'blocker' => $activityRepository->findBy(['blocker'=>$entry, 'status' => [0,1,2]]),
+            'blockee' => $activityRepository->findBy(['blockee'=>$entry, 'status' => [0,1,2]])
         ]);
     }
 
@@ -51,7 +51,8 @@ class ActivityController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$activity->getBlocker(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($activity);
+            $activity->setStatus(3);
+            //$entityManager->remove($activity);
             $entityManager->flush();
             $this->addFlash(
                 'success',
