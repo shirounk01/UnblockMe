@@ -51,16 +51,15 @@
                         <li class="nav-item">
                             <div class="dropdown">
                                 <a class="btn btn-primary dropdown-toggle nav-link" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    {{ app.user.username }}
+                                    Menu
                                 </a>
                                 <div class="dropdown-menu" style="right: 0; left: auto;" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="{{ path('profile') }}">My profile</a>
+                                    <hr class="dropdown-divider">
                                     <a class="dropdown-item" href="{{ path('license_plate_index') }}">My cars</a>
                                     <a class="dropdown-item" href="{{ path('activity_index') }}">My activity</a>
                                     <hr class="dropdown-divider">
-                                    <a class="dropdown-item" href="{{ path('password_new') }}">Change password</a>
                                     <a class="dropdown-item" href="{{ path('app_logout') }}">Log out</a>
-                                    <hr class="dropdown-divider">
-                                    {{ include('user/_delete_form.html.twig') }}
                                 </div>
                             </div>
                         </li>

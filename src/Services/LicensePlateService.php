@@ -72,4 +72,14 @@ class LicensePlateService
         }
     }
 
+    public function getLicensePlates(User $user)
+    {
+        $licensePlates = $this->licensePlateRepo->findBy(['user'=>$user]);
+        foreach ($licensePlates as &$licensePlate)
+        {
+            $licensePlate=$licensePlate->getLicensePlate();
+        }
+        return $licensePlates;
+    }
+
 }

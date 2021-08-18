@@ -1,0 +1,15 @@
+email,roles.0
+raresmihai18@gmail.com,ROLE_USER
+licensePlate
+DJ00ABC
+DJ01DEF
+CAR000
+CAR01
+blocker,blockee
+DJ00ABC,DJ46AFG
+blocker,blockee
+AAA,CAR01
+AAA,DJ00ABC
+DJ02GHI,DJ00ABC
+DJ10ASF,DJ01DEF
+WEW,DJ00ABC
